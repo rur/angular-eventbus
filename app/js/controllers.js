@@ -49,12 +49,12 @@ WelcomeCntl.prototype = {
  * This is a within the Welcome Partial
  * 
  */
-function WelcomeSubCtrl( $log, eventBus ){
+function WelcomeSubCntl( $log, eventBus ){
    var scope = this;
 
    var bus = eventBus(this);
    function sayHelloHandler( helloTo ){
-       $log.log( "WelcomeSubCtrl Says HELLO to " + helloTo + "!" );
+       $log.log( "WelcomeSubCntl Says HELLO to " + helloTo + "!" );
    }
 
    bus.add("sayHello", sayHelloHandler );
