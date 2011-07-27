@@ -1,0 +1,29 @@
+<!doctype html>
+<html xmlns:ng="http://angularjs.org/">
+<head>
+  <meta charset="utf-8">
+  <title>my angular app</title>
+  <link rel="stylesheet" href="css/app.css"/>
+</head>
+<body>
+  <div ng:controller="AppCntl">
+      <input type="text" id="helloee" name="helloee" value="world" />
+      <button ng:click="sayHello(helloee)">Say Hello</button>
+      
+    <h1>Your App Chrome</h1>
+    [ <a href="#">Welcome</a> | <a href="#/settings">Settings</a> ]
+    <hr/>
+    <span style="background-color: blue; color: white; padding: 3px;">
+      Partial: {{$route.current.template}}
+    </span>
+    <ng:view style="border: 1px solid blue; margin: 0; display:block; padding:1em;"></ng:view>
+    <small>Your app footer </small>
+  </div>
+
+  <script src="lib/angular/angular.js" ng:autobind></script>
+  <script src="js/services.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/widgets.js"></script>
+</body>
+</html>
