@@ -34,7 +34,7 @@ function WelcomeCntl( $log, eventBus ){
            $log.log( "Welcome Says HELLO to " + helloTo + "!" );
        }
        
-       bus.add("sayHello", sayHelloHandler );
+       bus.on("sayHello", sayHelloHandler );
 }
 WelcomeCntl.$inject = ['$log', 'eventBus']
 WelcomeCntl.prototype = { 
@@ -57,7 +57,7 @@ function WelcomeSubCntl( $log, eventBus ){
        $log.log( "WelcomeSubCntl Says HELLO to " + helloTo + "!" );
    }
 
-   bus.add("sayHello", sayHelloHandler );
+   bus.on("sayHello", sayHelloHandler );
 }
 WelcomeSubCntl.$inject = ['$log', 'eventBus']
 
@@ -74,7 +74,7 @@ function SettingsCntl( $log, eventBus){
        $log.log( "Settings Says HELLO to " + helloTo + "!" );
    }
 
-   bus.add("sayHello", sayHelloHandler );
+   bus.on("sayHello", sayHelloHandler );
 
    this.cancel();
 }

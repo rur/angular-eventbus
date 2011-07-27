@@ -104,7 +104,7 @@ angular.service("eventBus", function( scopeWatcher ){
         scopeWatch.onRemoved( dispose );
 
         return {
-            add:function( type, callback ){
+            on:function( type, callback ){
                 addListener( type, callback )
             },
             remove:function( callback ){
