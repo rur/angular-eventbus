@@ -36,7 +36,7 @@ function WelcomeCntl( $log, eventBus ){
        
        bus.add("sayHello", sayHelloHandler );
 }
-WelcomeCntl.$inject = ['$route', 'eventBus']
+WelcomeCntl.$inject = ['$log', 'eventBus']
 WelcomeCntl.prototype = { 
     greet: function(){
         alert("Hello " + this.person.name);
@@ -59,7 +59,7 @@ function WelcomeSubCntl( $log, eventBus ){
 
    bus.add("sayHello", sayHelloHandler );
 }
-WelcomeSubCntl.$inject = ['$route', 'eventBus']
+WelcomeSubCntl.$inject = ['$log', 'eventBus']
 
 
 /* 
@@ -78,7 +78,7 @@ function SettingsCntl( $log, eventBus){
 
    this.cancel();
 }
-SettingsCntl.$inject = ['$route', 'eventBus']
+SettingsCntl.$inject = ['$log', 'eventBus']
 SettingsCntl.prototype = {
     cancel: function(){
          this.form = angular.copy(this.person);
