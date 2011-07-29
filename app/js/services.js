@@ -38,7 +38,7 @@ angular.service("eventBus", function( scopeWatcher ){
     }
 
     function addListener(type, listener){
-        if(!eventMap[type] instanceof Array){
+        if(!(eventMap[type] instanceof Array)){
             eventMap[type] = [];
         }
         eventMap[type].push(listener);
@@ -56,7 +56,7 @@ angular.service("eventBus", function( scopeWatcher ){
         var garbage, listeners, type;
         for(type in removemap){
             garbage = removemap[type] || [];
-            listeners = eventmap[type] || [];
+            listeners = eventMap[type] || [];
 
             for(var i=listeners.length-1,j=garbage.length-1;i>-1;i--){
                 if(j == -1) break;
@@ -82,7 +82,7 @@ angular.service("eventBus", function( scopeWatcher ){
         return {
             on:function( type, listener ) {
                 addListener(type, listener);
-                if(!localEventMap[type] instanceof Array){
+                if(!(localEventMap[type] instanceof Array)){
                     localEventMap[type] = [];
                 }
                 localEventMap[type].push(listener);
