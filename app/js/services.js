@@ -75,9 +75,11 @@ angular.service("eventBus", function( scopeWatcher ){
             removeAll(localEventMap);
             localEventMap = {};
         }
-
-        var scopeWatch = scopeWatcher(scope);
-        scopeWatch.onRemoved( dispose );
+        
+        if(scope){
+            var scopeWatch = scopeWatcher(scope);
+            scopeWatch.onRemoved( dispose );
+        }
 
         return {
             on:function( type, listener ) {
