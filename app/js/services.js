@@ -27,100 +27,85 @@ angular.service('myAngularApp', function($route) {
  */
  
 angular.service("eventBus", function( scopeWatcher ){
-    var watchers = [];
-    function broadcast(){
-        for(var i = 0; i<watchers.length;i++){
-           watchers[i].apply(null, arguments);
-       }
+    var eventMap = {};
+    function broadcast( eventType ){
+        var args = [].slice.call(arguments,1);
+        var listeners = eventMap[eventType] || [];
+        
+        for(var i=0,len=listeners.length;i<len;i++){
+            listeners[i].apply(null,args);
+        }
     }
-    function watch( callback ){
-        var ind = watchers.indexOf(callback);
 
-       if(ind == -1){
-           watchers.push(callback);
-       }
+    function addListener(type, listener){
+        if(!eventMap[type] instanceof Array){
+            eventMap[type] = [];
+        }
+        eventMap[type].push(listener);
     }
-    function unwatch( callback ){
-        var ind = watchers.indexOf(callback);
 
-       if(ind > -1){
-           watchers.splice(ind,1);
-       }
+    function removeListener(type, listener){
+        var listeners = eventMap[type] || [];
+        var ind = listeners.indexOf(listener);
+        if(ind>-1){
+            listeners.splice(ind,1);
+        }
+    }
+
+    function removeAll( removemap ){
+        var garbage, listeners, type;
+        for(type in removemap){
+            garbage = removemap[type] || [];
+            listeners = eventmap[type] || [];
+
+            for(var i=listeners.length-1,j=garbage.length-1;i>-1;i--){
+                if(j == -1) break;
+                if( listeners[i] == garbage[j] ){
+                    listeners.splice(i,1);
+                    j--;
+                }
+            }
+        }
     }
 
     return function( scope ){
-        var listenerMap = {};
-        var typeMap = {};
-
-        function reciever( type ){
-            var args = [].slice.apply(arguments);
-
-            if(typeMap[type] instanceof Array){
-                var lstnrs = typeMap[type];
-                var args = args.length>1 ? args.slice(1) : [];
-                for(var i = 0; i < lstnrs.length;i++){
-                    lstnrs[i].apply(null,args);
-                }
-            }
-        }
-
-        function addListener( type, callback ){
-            if( !(typeMap[type] instanceof Array)) {
-                typeMap[type] = [];
-            }
-            if( !(listenerMap[callback] instanceof Array)) {
-                listenerMap[callback] = [];
-            }
-
-            typeMap[type].push(callback);
-            listenerMap[callback].push(type);
-        }
-
-        function removeListener(callback){
-            var types = listenerMap[callback];
-            if(types instanceof Array){
-                for(var i = 0;i<types.length;i++){
-                    var ind = typeMap[types[i]].indexOf(callback);
-                    if(ind > -1){
-                        typeMap[types[i]].splice(ind,1);
-                    }
-                }
-            }
-
-            delete listenerMap[callback];
-        }
-
-        function build(){
-            watch(reciever);
-        }
+        var localEventMap = {};
 
         function dispose(){
-            unwatch(reciever);
-            listenerMap = {};
+            removeAll(localEventMap);
+            localEventMap = {};
         }
 
         var scopeWatch = scopeWatcher(scope);
-        scopeWatch.onAdded( build );
         scopeWatch.onRemoved( dispose );
 
         return {
-            on:function( type, callback ){
-                addListener( type, callback )
+            on:function( type, listener ) {
+                addListener(type, listener);
+                if(!localEventMap[type] instanceof Array){
+                    localEventMap[type] = [];
+                }
+                localEventMap[type].push(listener);
             },
-            remove:function( callback ){
-                removeListener( callback );
+            remove:function( type, listener ){
+                removeListener(type,listener);
+                var listeners = localEventMap[type] || [];
+                var ind = listeners.indexOf(listener);
+                    if(ind>-1){
+                    listeners.splice(ind,1);
+                }
             },
-            removeAll:function(){
-              listenerMap = {};
-              typeMap = {};
+            removeAll:function() {
+                removeAll(localEventMap);
+                localEventMap = {};
             },
-            emit:function(){
-              if( arguments.length > 0 && typeof arguments[0] == "string" ){
-                broadcast.apply( null, arguments ); 
-              }
-              else {
-                  throw { message:"Cannot emit event, incorrect arguments", arguments:arguments };
-              }
+            emit:function() {
+                if( arguments.length > 0 && typeof arguments[0] == "string" ){
+                    broadcast.apply( null, arguments ); 
+                }
+                else {
+                    throw { message:"Cannot emit event, incorrect arguments", arguments:arguments };
+                }
             }
         }
     }
@@ -143,19 +128,10 @@ angular.service("eventBus", function( scopeWatcher ){
  */
 
 angular.service( "scopeWatcher", function(){
-   var root;
+   var root = this;
    var rootCallbacks = [];
    
-   // TODO: try figure out if there is a better way of
-   ///      getting the root scope
-   function addRoot(rootScope){
-       if(!root){
-           root = rootScope;
-           root.$onEval(rootEval)
-       }
-   }
-
-   function rootEval(){
+    function rootEval(){
        for(var i = 0; i<rootCallbacks.length;i++){
            rootCallbacks[i]();
        }
@@ -176,6 +152,8 @@ angular.service( "scopeWatcher", function(){
            rootCallbacks.splice(ind,1);
        }
    }
+   
+   root.$onEval(rootEval);
 
    return function(scope){
        var scopeEval = false;
@@ -209,8 +187,6 @@ angular.service( "scopeWatcher", function(){
        }
 
        scope.$onEval(onScopeEval);
-       // TODO: test if this really works
-       if(scope.$root !== scope) addRoot(scope.$root);
 
        return {
            onAdded:function(cb){
