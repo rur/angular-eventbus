@@ -5,6 +5,8 @@
  * 
  */
 function AppCntl($route, eventBus) {
+    var self = this;
+    
     $route.parent(this);
    
     // initialize the model to something useful
@@ -13,10 +15,10 @@ function AppCntl($route, eventBus) {
      contacts:[{type:'email', url:'anonymous@example.com'}]
     };
     
-     var bus = eventBus(this);
+     this.bus = eventBus(this);
     
     this.sayHello = function(toWho){
-        bus.emit("sayHello", toWho);
+        self.bus.emit("sayHello", toWho);
     }
 }
 AppCntl.$inject = ['$route', 'eventBus']
@@ -25,9 +27,11 @@ AppCntl.$inject = ['$route', 'eventBus']
  * Welcome Partial Controller 
  * 
  */
-function WelcomeCntl( $log, eventBus ){
+function WelcomeCntl( $log, eventBus, $window ){
        var scope = this;
        var it = 1;
+       
+       scope.window = $window;
        
        var bus = eventBus(this);
        function sayHelloHandler( helloTo ){
@@ -36,10 +40,10 @@ function WelcomeCntl( $log, eventBus ){
        
        bus.on("sayHello", sayHelloHandler );
 }
-WelcomeCntl.$inject = ['$log', 'eventBus']
+WelcomeCntl.$inject = ['$log', 'eventBus','$window']
 WelcomeCntl.prototype = { 
     greet: function(){
-        alert("Hello " + this.person.name);
+        this.window.alert("Hello " + this.person.name);
     }
 };
 
