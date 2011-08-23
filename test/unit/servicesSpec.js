@@ -128,4 +128,23 @@ describe("EventBus Service", function(){
       bus.emit(testEvent,1);
       expect(listener).not.toHaveBeenCalledWith(1);
    });
+   
+   it("should add, trigger and remove listeners on static and child buses from static emit call to event bus", function(){
+      var bus = busService(scope);
+      var listener = jasmine.createSpy("child bus listener");
+      var stListener = jasmine.createSpy("observer on static event bus 'on'");
+      bus.on(testEvent, listener);
+      busService.on(testEvent, stListener);
+      
+      busService.emit(testEvent, 1);
+      expect(listener).toHaveBeenCalledWith(1);
+      expect(stListener).toHaveBeenCalledWith(1);
+      
+      busService.remove(testEvent, stListener);
+      bus.remove(testEvent, listener);
+      
+      busService.emit(testEvent, 2);
+      expect(listener).not.toHaveBeenCalledWith(2);
+      expect(stListener).not.toHaveBeenCalledWith(2);
+   });
 });

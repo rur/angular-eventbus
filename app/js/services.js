@@ -48,7 +48,8 @@ angular.service('$eventBus', function( scopeWatcher ) {
     };
     
     // TODO: Figure out how to remove a listener which was added using child bus
-            // but was removed using the static remove method
+        // but was removed using the static remove method, definate issues there.
+        // Maybe just prevent it from being done
     mainBus.remove = function(type, listener) {
         var lsnrs = listeners[type];
         var ind = lsnrs instanceof Array ? lsnrs.indexOf(listener) : -1;
@@ -57,17 +58,44 @@ angular.service('$eventBus', function( scopeWatcher ) {
         }
     };
 
-    // TODO: Figure out what happens to the reference held in the ChildBus
-            // when all events are removed using this method
     mainBus.removeAll = function(type) {
-        if (type) listeners[type] = [];
-        else listeners = {};
+        if (typeof type == 'string') {
+            listeners[type] = [];
+        }
+        else if(type instanceof Object) {
+            //// let's do bit more magic to make it linear rather than quadratic...
+            // the order of localListeners is the same as in listeners
+            // see http://jsperf.com/remove-all-items-from-array
+            angular.forEach(type, function( lsnrs, evttyp ){
+                if( !listeners[evttyp] instanceof Array ) return;
+                var rslt = [],
+                lsnrsMain = listeners[evttyp],
+                i = j = 0;
+                while (i < lsnrs.length) {
+                    while (lsnrs[i] !== lsnrsMain[j]) {
+                        rslt.push(lsnrsMain[j++]);
+                    }
+                    i++;
+                    j++;
+                }
+                while (j < lsnrsMain.length) {
+                    rslt.push(lsnrsMain[j++]);
+                }
+                
+                listeners[evttyp] = rslt;
+            })
+        }
+        else{
+            listeners = {};
+            // this will instruct all child bus objects to dump their ref to their listeners
+            mainBus.emit(allRemovedEvent);
+        } 
     };
 
     return mainBus;
 
     function ChildBus(main, scope) {
-        var localListeners = {}, watcher;
+        var localListeners = {}, watcher, child = this;
         
         this.on = function(type, listener) {
             main.on(type, listener);
@@ -91,27 +119,26 @@ angular.service('$eventBus', function( scopeWatcher ) {
         };
 
         this.removeAll = function(type) {
-            // let's do bit more magic to make it linear rather than quadratic...
-            // the order of localListeners is the same as in listeners
-            // see http://jsperf.com/remove-all-items-from-array
+            main.removeAll(localListeners);
             
-            this.tidyUp();
+            localListeners = {};
         };
-
+        
         function dispose(){
-            this.removeAll();
-        };
+            child.removeAll();
+            main.remove(allRemovedEvent, tidyUp);
+            tidyUp()
+        }
         
         function tidyUp(){
             localListeners = {};
-            main.remove(allRemovedEvent, tidyUp);
         }
         
         main.on(allRemovedEvent, tidyUp);
 
         if (scope){
             watcher = scopeWatcher(scope);
-            watcher.onRemoved(dispose);
+            watcher.onRemoved( this.removeAll );
         }
     };
 }, {$inject:["scopeWatcher"]});
