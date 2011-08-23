@@ -1,0 +1,6 @@
+Angular Event Bus Service
+========================
+
+This is a prototype exploring an event bus for Angular JS implemented as a stand alone service. A Scope Watcher service was also created as a interim solution until a tear-down event is added to the Angular Scope object.
+
+The Angular JS team are also working on a scope based event bus implementation, you can check out their progress here: https://github.com/angular/angular.js/pull/522
