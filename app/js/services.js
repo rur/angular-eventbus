@@ -18,101 +18,103 @@ angular.service('myAngularApp', function($route) {
  * @name eventBus
  * @requres scopeWatcher
  *
- * @property {Object} current scope.
- *
  * @description
  * Dispatch and respond to events across application tiers.
  *
  *   
  */
  
-angular.service("eventBus", function( scopeWatcher ){
-    var eventMap = {};
-    function broadcast( eventType ){
-        var args = [].slice.call(arguments,1);
-        var listeners = eventMap[eventType] || [];
+angular.service('$eventBus', function( scopeWatcher ) {
+    var listeners = {}, allRemovedEvent = "eventBusAllListenersRemoved";
+    var mainBus = function(scope) {
+        return new ChildBus(mainBus, scope);
+    };
+
+    mainBus.emit = function(type) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        // optimize for calls with 1 or 0 arguments - "apply" is expensive
+        angular.forEach(listeners[type], function(listener) {
+            if (!args.length) listener();
+            else if (!args.length == 1) listener(args[0]);
+            else listener.apply(null, args);
+        });
+    };
+
+    mainBus.on = function(type, listener) {
+        if(!(listeners[type] instanceof Array)){
+            listeners[type] = [];
+        }
+        listeners[type].push(listener);
+    };
+    
+    // TODO: Figure out how to remove a listener which was added using child bus
+            // but was removed using the static remove method
+    mainBus.remove = function(type, listener) {
+        var lsnrs = listeners[type];
+        var ind = lsnrs instanceof Array ? lsnrs.indexOf(listener) : -1;
+        if(ind > -1){
+            listeners[type].splice(ind,1);
+        }
+    };
+
+    // TODO: Figure out what happens to the reference held in the ChildBus
+            // when all events are removed using this method
+    mainBus.removeAll = function(type) {
+        if (type) listeners[type] = [];
+        else listeners = {};
+    };
+
+    return mainBus;
+
+    function ChildBus(main, scope) {
+        var localListeners = {}, watcher;
         
-        for(var i=0,len=listeners.length;i<len;i++){
-            listeners[i].apply(null,args);
-        }
-    }
-
-    function addListener(type, listener){
-        if(!(eventMap[type] instanceof Array)){
-            eventMap[type] = [];
-        }
-        eventMap[type].push(listener);
-    }
-
-    function removeListener(type, listener){
-        var listeners = eventMap[type] || [];
-        var ind = listeners.indexOf(listener);
-        if(ind>-1){
-            listeners.splice(ind,1);
-        }
-    }
-
-    function removeAll( removemap ){
-        var garbage, listeners, type;
-        for(type in removemap){
-            garbage = removemap[type] || [];
-            listeners = eventMap[type] || [];
-
-            for(var i=listeners.length-1,j=garbage.length-1;i>-1;i--){
-                if(j == -1) break;
-                if( listeners[i] == garbage[j] ){
-                    listeners.splice(i,1);
-                    j--;
-                }
+        this.on = function(type, listener) {
+            main.on(type, listener);
+            
+            if(!(localListeners[type] instanceof Array)){
+                localListeners[type] = [];
             }
-        }
-    }
+            localListeners[type].push(listener);
+        };
 
-    return function( scope ){
-        var localEventMap = {};
+        this.emit = main.emit;
+
+        this.remove = function(type, listener) {
+            main.remove(type, listener);
+            
+            var lsnrs = localListeners[type];
+            var ind = lsnrs instanceof Array ? lsnrs.indexOf(listener) : -1;
+            if(ind > -1){
+                localListeners[type].splice(ind,1);
+            }
+        };
+
+        this.removeAll = function(type) {
+            // let's do bit more magic to make it linear rather than quadratic...
+            // the order of localListeners is the same as in listeners
+            // see http://jsperf.com/remove-all-items-from-array
+            
+            this.tidyUp();
+        };
 
         function dispose(){
-            removeAll(localEventMap);
-            localEventMap = {};
+            this.removeAll();
+        };
+        
+        function tidyUp(){
+            localListeners = {};
+            main.remove(allRemovedEvent, tidyUp);
         }
         
-        if(scope){
-            var scopeWatch = scopeWatcher(scope);
-            scopeWatch.onRemoved( dispose );
-        }
+        main.on(allRemovedEvent, tidyUp);
 
-        return {
-            on:function( type, listener ) {
-                addListener(type, listener);
-                if(!(localEventMap[type] instanceof Array)){
-                    localEventMap[type] = [];
-                }
-                localEventMap[type].push(listener);
-            },
-            remove:function( type, listener ){
-                removeListener(type,listener);
-                var listeners = localEventMap[type] || [];
-                var ind = listeners.indexOf(listener);
-                    if(ind>-1){
-                    listeners.splice(ind,1);
-                }
-            },
-            removeAll:function() {
-                removeAll(localEventMap);
-                localEventMap = {};
-            },
-            emit:function() {
-                if( arguments.length > 0 && typeof arguments[0] == "string" ){
-                    broadcast.apply( null, arguments ); 
-                }
-                else {
-                    throw { message:"Cannot emit event, incorrect arguments", arguments:arguments };
-                }
-            }
+        if (scope){
+            watcher = scopeWatcher(scope);
+            watcher.onRemoved(dispose);
         }
-    }
-
-}, {$inject:["scopeWatcher"]})
+    };
+}, {$inject:["scopeWatcher"]});
 
 
 /**

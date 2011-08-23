@@ -21,7 +21,7 @@ function AppCntl($route, eventBus) {
         self.bus.emit("sayHello", toWho);
     }
 }
-AppCntl.$inject = ['$route', 'eventBus']
+AppCntl.$inject = ['$route', '$eventBus']
    
 /* 
  * Welcome Partial Controller 
@@ -40,7 +40,7 @@ function WelcomeCntl( $log, eventBus, $window ){
        
        bus.on("sayHello", sayHelloHandler );
 }
-WelcomeCntl.$inject = ['$log', 'eventBus','$window']
+WelcomeCntl.$inject = ['$log', '$eventBus','$window']
 WelcomeCntl.prototype = { 
     greet: function(){
         this.window.alert("Hello " + this.person.name);
@@ -63,7 +63,7 @@ function WelcomeSubCntl( $log, eventBus ){
 
    bus.on("sayHello", sayHelloHandler );
 }
-WelcomeSubCntl.$inject = ['$log', 'eventBus']
+WelcomeSubCntl.$inject = ['$log', '$eventBus']
 
 
 /* 
@@ -82,7 +82,7 @@ function SettingsCntl( $log, eventBus){
 
    this.cancel();
 }
-SettingsCntl.$inject = ['$log', 'eventBus']
+SettingsCntl.$inject = ['$log', '$eventBus']
 SettingsCntl.prototype = {
     cancel: function(){
          this.form = angular.copy(this.person);

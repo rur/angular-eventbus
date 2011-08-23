@@ -12,7 +12,7 @@ describe('AppCntl', function(){
       
     scope = angular.scope();
     $route = scope.$service("$route");
-    eventbus = scope.$service("eventBus");
+    eventbus = scope.$service('$eventBus');
       
     appCtrl = scope.$new(AppCntl);
     ctrlBus = appCtrl.bus;
@@ -44,7 +44,7 @@ describe('WelcomeCntl', function(){
   beforeEach(function(){
       var scope = angular.scope();
       $log = scope.$service("$log");
-      bus = scope.$service("eventBus")(scope);
+      bus = scope.$service('$eventBus')(scope);
       window = scope.$service("$window");
       var appCntl = scope.$new(AppCntl);
       wCntl = appCntl.$new(WelcomeCntl);
@@ -67,7 +67,7 @@ describe('WelcomeSubCntl', function(){
   beforeEach(function(){
       var scope = angular.scope();
       $log = scope.$service("$log");
-      bus = scope.$service("eventBus")(scope);
+      bus = scope.$service('$eventBus')(scope);
       wCntl = scope.$new(WelcomeSubCntl);
       
   });
@@ -90,7 +90,7 @@ describe('SettingsCntl', function(){
 
       var scope = angular.scope();
       $log = scope.$service("$log");
-      bus = scope.$service("eventBus")(scope);
+      bus = scope.$service('$eventBus')(scope);
       appCntl = scope.$new(AppCntl);
       sCntl = appCntl.$new(SettingsCntl);
       

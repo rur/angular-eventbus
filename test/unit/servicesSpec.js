@@ -46,7 +46,7 @@ describe("EventBus Service", function(){
    beforeEach( function(){
       scope = angular.scope();
       scope2 = angular.scope();
-      busService = scope.$service("eventBus");
+      busService = scope.$service("$eventBus");
       testEvent = "testEvent";
    });
    
