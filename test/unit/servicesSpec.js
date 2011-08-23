@@ -78,12 +78,54 @@ describe("EventBus Service", function(){
        expect(listener).toHaveBeenCalledWith(1,arr,"test");
    });
    
-   it("add, trigger and then remove a listener", function(){
+   it("should add, trigger and then remove a listener", function(){
       var bus = busService(scope);
       var listener = jasmine.createSpy("Simple Callback Spy");
       bus.on(testEvent, listener);
+      bus.emit( testEvent, 1 );
+      expect(listener).toHaveBeenCalledWith(1);
       bus.remove(testEvent, listener);
+      bus.emit(testEvent, 2);
+      expect(listener).not.toHaveBeenCalledWith(2);
+   });
+   
+   it("should remove all listeners in a given scope", function(){
+       var bus = busService(scope);
+       var lsnrs = [], lsnrCount = 10, i = 0, lsnr;
+       while( i++ < lsnrCount ){
+           lsnr = jasmine.createSpy("Simple spy " + (i+1));
+           lsnrs.push(lsnr);
+           bus.on(testEvent, lsnr);
+       }
+       
+       bus.emit(testEvent, 1);
+       i = 0;
+       while( i < lsnrCount ){
+           lsnr = lsnrs[i];
+           expect(lsnr).toHaveBeenCalledWith(1);
+           i++;
+       }
+       
+       bus.removeAll();
+       bus.emit(testEvent, 2);
+       i = 0;
+       while( i < lsnrCount ){
+           lsnr = lsnrs[i];
+           expect(lsnr).not.toHaveBeenCalledWith(2);
+           i++
+       }
+   });
+   
+   it("should remove all listeners when the scope is removed", function(){
+      var bus = busService(scope2);
+      var listener = jasmine.createSpy("testCallback");
+      bus.on(testEvent,listener);
       bus.emit(testEvent);
-      expect(listener).not.toHaveBeenCalled();
+      expect(listener).toHaveBeenCalled();
+      scope2.$eval(); // added will dispatch... necessary for removed to be triggered
+      scope.$eval(); 
+      scope.$eval(); // should trigger removed on scope 2 since it was not evaluated
+      bus.emit(testEvent,1);
+      expect(listener).not.toHaveBeenCalledWith(1);
    });
 });
