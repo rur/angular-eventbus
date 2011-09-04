@@ -12,6 +12,44 @@ angular.service('myAngularApp', function($route) {
 }, {$inject:['$route'], $eager: true});
 
 
+/**
+ * @workInProgress
+ * @name $commandMap
+ * @requres $eventBus
+ *
+ * @description
+ * map events to command objects using the event bus
+ *   
+ */
+angular.service("$commandMap", function($eventBus){
+    var commands = {};
+    var map = {
+        mapEvent:function(type, command, onceOnly){
+            if(!(commands[type] instanceof Array)){
+                commands[type] = [];
+            }
+            commands[type].push({command:command, once:onceOnly});
+        },
+        unmapEvent:function(type,command){
+            var cmnds = commands[type];
+            if( !cmnds || cmnds.length < 1 ) return;
+            for (var i = 0; i < cmnds.length; i++) {
+                if(command === cmnds[i].command){
+                    cmnds.splice(i,1);
+                }
+            }
+        },
+        unmapAllEvents:function(){
+            commands = {};
+        }
+    }
+    
+    
+    
+    return map;
+}, {$inject:["$eventBus"]});
+
+
 
 /**
  * @workInProgress
@@ -36,6 +74,14 @@ angular.service('$eventBus', function( scopeWatcher ) {
         angular.forEach(listeners[type], function(listener) {
             if (!args.length) listener();
             else if (!args.length == 1) listener(args[0]);
+            else listener.apply(null, args);
+        });
+        // call listeners that subscribed to all events using wildcard '*' 
+        if(type == "*") return;
+        args = Array.prototype.slice.call(arguments);
+        angular.forEach(listeners["*"], function(listener) {
+            if (args.length == 1) listener( args[0] );
+            else if (!args.length == 2) listener(args[0], args[1]);
             else listener.apply(null, args);
         });
     };
@@ -70,7 +116,7 @@ angular.service('$eventBus', function( scopeWatcher ) {
                 if( !listeners[evttyp] instanceof Array ) return;
                 var rslt = [],
                 lsnrsMain = listeners[evttyp],
-                i = j = 0;
+                i = 0, j = 0;
                 while (i < lsnrs.length) {
                     while (lsnrs[i] !== lsnrsMain[j]) {
                         rslt.push(lsnrsMain[j++]);
@@ -124,14 +170,14 @@ angular.service('$eventBus', function( scopeWatcher ) {
             localListeners = {};
         };
         
+        function tidyUp(){
+            localListeners = {};
+        }
+        
         function dispose(){
             child.removeAll();
             main.remove(allRemovedEvent, tidyUp);
             tidyUp()
-        }
-        
-        function tidyUp(){
-            localListeners = {};
         }
         
         main.on(allRemovedEvent, tidyUp);

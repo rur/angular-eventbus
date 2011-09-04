@@ -147,4 +147,66 @@ describe("EventBus Service", function(){
       expect(listener).not.toHaveBeenCalledWith(2);
       expect(stListener).not.toHaveBeenCalledWith(2);
    });
+   
+   it("should call wildcard listener when any event is emitted", function(){
+       var wildcardLsnr = jasmine.createSpy("Wildcard listener");
+       busService.on("*",wildcardLsnr);
+       busService.emit("testEvent");
+       expect(wildcardLsnr).toHaveBeenCalledWith("testEvent");
+       busService.emit("testEvent",1,2,3);
+       expect(wildcardLsnr).toHaveBeenCalledWith("testEvent",1,2,3);
+       busService.remove("*",wildcardLsnr);
+       busService.emit("testEvent","test_param");
+       expect(wildcardLsnr).not.toHaveBeenCalledWith("testEvent", "test_param");
+   })
 });
+
+/*
+describe("CommandMap Service",function(){
+    var comMap, map, eventBus, listener;
+
+    beforeEach(function(){
+        var Command = function( $eventBus ){
+            this.execute = function(){
+                var args = ["myEventResponse"];
+                args = args.concat(Array.prototype.slice.call(arguments));
+                $eventBus.emit.apply( null, args );
+            }
+        }
+        Command.$inject = ["$eventBus"];
+        eventBus = angular.service("$eventBus");
+        comMap = angular.service("$commandMap");
+        comMap.mapEvent("myEvent", Command);
+        listener = jasmine.createSpy();
+    })
+
+    //$commandMap.mapEvent("myEvent",MyEventCommand,false);
+    ///// spec /////
+    // it should respond with myEventResponse when myEvent is dispatched.
+    
+    it("should respond with myEventResponse when myEvent is dispatched.", function(){
+        eventBus.on("myEventResponse", listener);
+        eventBus.emit("myEvent");
+        expect(listener).toHaveBeenCalled();
+        var ar = [3];
+        eventBus.emit("myEvent", 1,"2",ar);
+        expect(listener).toHaveBeenCalledWith(1,"2",ar);
+    })
+    // It should execute the command once only
+    // it should throw an error when the same event -> command combo is mapped twice
+
+
+    //$commandMap.unmapEvent("myEvent",MyEventCommand);
+
+    ///// spec /////
+    // it should unmap the specified event -> command combination
+    // it should not complain if no match is found
+
+    //$commandMap.unmapEvents();
+
+    ///// spec /////
+    // it should unmap all events
+    // it should unmap events that were added with once only
+   
+})
+*/
