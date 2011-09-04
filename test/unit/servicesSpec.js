@@ -161,52 +161,102 @@ describe("EventBus Service", function(){
    })
 });
 
-/*
 describe("CommandMap Service",function(){
-    var comMap, map, eventBus, listener;
+    var scope, comMap, map, eventBus, listener, Command;
 
     beforeEach(function(){
-        var Command = function( $eventBus ){
+        scope = angular.scope();
+        Command = function( bus ){
             this.execute = function(){
                 var args = ["myEventResponse"];
                 args = args.concat(Array.prototype.slice.call(arguments));
-                $eventBus.emit.apply( null, args );
+                bus.emit.apply( null, args );
             }
         }
         Command.$inject = ["$eventBus"];
-        eventBus = angular.service("$eventBus");
-        comMap = angular.service("$commandMap");
-        comMap.mapEvent("myEvent", Command);
+        
+        eventBus = scope.$service("$eventBus");
+        comMap = scope.$service("$commandMap");
         listener = jasmine.createSpy();
-    })
+    });
 
     //$commandMap.mapEvent("myEvent",MyEventCommand,false);
     ///// spec /////
-    // it should respond with myEventResponse when myEvent is dispatched.
-    
     it("should respond with myEventResponse when myEvent is dispatched.", function(){
+        comMap.mapEvent("myEvent", Command);
         eventBus.on("myEventResponse", listener);
-        eventBus.emit("myEvent");
+        eventBus.emit("myEvent", 1,2,3);
         expect(listener).toHaveBeenCalled();
         var ar = [3];
         eventBus.emit("myEvent", 1,"2",ar);
         expect(listener).toHaveBeenCalledWith(1,"2",ar);
-    })
-    // It should execute the command once only
-    // it should throw an error when the same event -> command combo is mapped twice
-
+    });
+    
+    it( "should execute the command once only", function(){
+        comMap.mapEvent("myEvent", Command, true);
+        eventBus.on("myEventResponse", listener);
+        eventBus.emit("myEvent", 1,2,3);
+        expect(listener).toHaveBeenCalledWith(1,2,3);
+        var ar = [3];
+        eventBus.emit("myEvent", ar);
+        expect(listener).not.toHaveBeenCalledWith(ar);
+    });
+    
+    it ( "should throw an error when the same event -> command combo is mapped twice",function(){
+        comMap.mapEvent("myEvent", Command, true);
+        var error;
+        try{
+            comMap.mapEvent("myEvent", Command);   
+        } catch(err){
+            error = err;
+        }
+        expect(error).toBeDefined();
+        eventBus.emit("myEvent");
+        eventBus.on("myEventResponse", listener);
+        eventBus.emit("myEvent");
+        expect(listener).not.toHaveBeenCalled();
+        comMap.mapEvent("myEvent",Command);
+        eventBus.emit("myEvent");
+        expect(listener).toHaveBeenCalled();
+    });
+    
 
     //$commandMap.unmapEvent("myEvent",MyEventCommand);
 
     ///// spec /////
-    // it should unmap the specified event -> command combination
-    // it should not complain if no match is found
+    it( "should unmap the specified event -> command combination", function(){
+        comMap.mapEvent("myEvent", Command);
+        eventBus.on("myEventResponse", listener);
+        eventBus.emit("myEvent", 1,2,3);
+        expect(listener).toHaveBeenCalledWith(1,2,3);
+        comMap.unmapEvent("myEvent", Command);
+        var ar = [3];
+        eventBus.emit("myEvent", ar);
+        expect(listener).not.toHaveBeenCalledWith(ar);
+    });
+    
+    it( "should not complain if no match is found", function(){
+        var error;
+        try{
+            comMap.unmapEvent("myEvent", Command, true);
+            comMap.unmapEvent("myEvent", Command);        
+        } catch(err){
+            error = err;
+        }
+        expect(error).not.toBeDefined();
+    });
 
     //$commandMap.unmapEvents();
 
     ///// spec /////
-    // it should unmap all events
-    // it should unmap events that were added with once only
-   
-})
-*/
+    it( "should unmap all events", function(){
+        comMap.mapEvent("myEvent", Command);
+        eventBus.on("myEventResponse", listener);
+        eventBus.emit("myEvent", 1,2,3);
+        expect(listener).toHaveBeenCalledWith(1,2,3);
+        comMap.unmapAllEvents();
+        var ar = [3];
+        eventBus.emit("myEvent", ar);
+        expect(listener).not.toHaveBeenCalledWith(ar);
+    });
+});

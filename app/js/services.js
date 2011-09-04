@@ -22,30 +22,60 @@ angular.service('myAngularApp', function($route) {
  *   
  */
 angular.service("$commandMap", function($eventBus){
-    var commands = {};
+    var commands = {}, root = this;
     var map = {
         mapEvent:function(type, command, onceOnly){
             if(!(commands[type] instanceof Array)){
                 commands[type] = [];
             }
+            angular.forEach(commands[type],function(cmndDef){
+               if(cmndDef.command === command ){
+                   if(cmndDef.once || onceOnly) throw "Conflict with previusly mapped event involving a 'once only' command.";
+                   // aleady mapped job done
+                   return;
+               }
+            });
             commands[type].push({command:command, once:onceOnly});
         },
         unmapEvent:function(type,command){
             var cmnds = commands[type];
             if( !cmnds || cmnds.length < 1 ) return;
+            var newCmnds = [];
             for (var i = 0; i < cmnds.length; i++) {
-                if(command === cmnds[i].command){
-                    cmnds.splice(i,1);
+                if(command !== cmnds[i].command){
+                    newCmnds.push(cmnds[i]);
                 }
             }
+            commands[type] = newCmnds;
         },
         unmapAllEvents:function(){
             commands = {};
         }
     }
     
+    var busListener = function( type ){
+        var cmnds = commands[type];
+        
+        if(!cmnds || cmnds.length < 1){
+            return;
+        } 
+        var args = Array.prototype.slice.call(arguments, 1);
+        angular.forEach(cmnds, function(cmndDef) {
+            // create command as a scope to allow for DI
+            // TODO: Find out if this has Memory implications.
+            var cmnd = root.$new( cmndDef.command );
+            if( typeof cmnd["execute"] != "function" ) throw "Command '"+cmnd+"' must have an execute method!";
+            if (!args.length) cmnd.execute();
+            else if (!args.length == 1) cmnd.execute(args[0]);
+            else cmnd.execute.apply(null, args);
+            
+            if(cmndDef.once){
+                map.unmapEvent(type, cmndDef.command);
+            }
+        });
+    }
     
-    
+    $eventBus.on("*", busListener);
     return map;
 }, {$inject:["$eventBus"]});
 
