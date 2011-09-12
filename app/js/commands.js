@@ -14,35 +14,105 @@ function StartUpCommand( $commandMap ){
 StartUpCommand.$inject = ['$commandMap'];
 
 function InputCommand( $eventBus, calculator ){
+    var self = this;
+    this.calculator = calculator;
+    
+    /**
+     *  execute get called by the commmand map with the
+     *  params of the 'emit' event bus call
+     */
     this.execute = function( input, expression, scope ){
-        var inp = String(input), 
-        newval, 
-        expr = expression.slice(),
-        operators = ["+","-","/","*","="];
-        if( inp.match(/^\d{1}$/) ||
-            inp == "."           ||
-            inp == "+/-" )
-        {
-            newval = "";    
-            if(expr.length % 2 == 1){
-                newval = expr.splice(expr.length-1,1)[0];
-            }
-            if(inp.match(/^\d{1}$/)){
-                newval = newval + inp;
-            } else if(inp == "." ){
-                if(!newval.match(/\d+\.\d*$/)){
-                    newval = newval + inp;
-                }
-            } else if(inp == "+/-"){
-                newval = String(newval * -1);
-            }
-            expr.push( newval );
-            scope.expression = expr;
-        } //else if(angular.Array.count(operators, inp) > 0) {
-            // evaluate the existing expression
-            
-        //}
+       input = String(input);
+       var newexp = expression || [], 
+       digitInd = newexp.length - ( newexp.length % 2 ),
+       operators = ["+", "-", "*", "/"],
+       modifiers = ["+/-", "."]; 
+       
+       if( input.match(/^\d$/)){
+           // add a digit
+           // the last operation is '=', reset
+           if(newexp[digitInd-1] == "="){
+               newexp = [self.addDigit(input)];
+           } else {
+               newexp[digitInd] = self.addDigit(input, newexp[digitInd]);
+           }
+       } else if(modifiers.indexOf(input) > -1){
+           // modify operand
+           newexp[digitInd] = self.modifyOperand(input, newexp[digitInd]);
+       } else if( operators.indexOf(input)> -1 ){
+           // add operator, evaluating first!
+           newexp = self.evaluateExpression(newexp);
+           if(!newexp[0])newexp[0] = "0"; 
+           newexp[1] = input;
+       } else if( input == "=" ){
+           // just evaluate
+           newexp = [self.evaluateExpression(newexp)[0]];
+           newexp[1] = "=";
+       } else if( input == "C" ){
+           // clear expression
+           newexp = [];
+       }
+   
+       scope.expression = newexp;
     }
 }
-InputCommand.$inject = ["$eventBus", "calculator"];
+InputCommand.prototype = {
+    addDigit:function( digit, operand ){
+        digit = String(digit);
+        if(!digit.match(/^[\d\.]$/)) return operand;
+        operand = operand || "";
+        operand = operand + digit;
+        // get rid of unnecessaray 0 at the start
+        operand = operand.replace( /(^-?)0+(0\.|[1-9]|0)/, "$1$2" );
+        return operand;
+    },
+    modifyOperand:function(input,operand){
+        operand = operand || "";
+        switch(input){
+            case "+/-":
+                if(operand.charAt(0) == "-"){
+                 return operand.substr(1);
+                } else {
+                    return "-"+operand;
+                }
+                break;
+            case ".":
+                if(!operand.match(/\d+\.\d*$/)){
+                    operand = operand + ".";
+                    return operand.replace(/(^|[^\d])\./,"$10.");
+                }
+                break;
+        }
+        return operand;
+    },
+    evaluateExpression:function(expr){
+        var res = expr ? expr.slice() : [], 
+	operand1 = res[0] * 1, 
+	operation = res[1],
+	operand2 = res[2] * 1,
+	ans;
+	if( operand1 && operation && operand2){
+            switch(operation){
+                case "+":
+                    ans = [this.calculator.add(operand1,operand2)];
+                    break;
+                case "-":
+                    ans = [ this.calculator.subtract(operand1,operand2) ];
+                    break;
+                case "*":
+                    ans = [this.calculator.multiply(operand1,operand2) ];
+                    break;
+                case "/":
+                    ans =  [this.calculator.divide(operand1,operand2)];
+                    break;
+            }
+            if( ans ){
+                // provides recursion
+                res = this.evaluateExpression(ans.concat(res.slice(3)));
+            }
+	}
+	return res;
+    }
+}
 
+InputCommand.$inject = ["$eventBus", "calculator"];
