@@ -1,15 +1,35 @@
 /* http://docs.angularjs.org/#!angular.service */
 
 /**
- * App service which is responsible for the main configuration of the app.
+ * Gets called when angular boots
  */
-angular.service('myAngularApp', function($route) {
+angular.service('angularBoot', function($commandMap) {
+    // Startup command give you more control over when startup code gets called.
+    // Initing the app with an 'eager service' seems a little unintuitive to me
+    // NB: 'onceOnly'(p3) is true
+    $commandMap.mapEvent("startup", StartUpCommand, true );
+}, {$inject:['$commandMap'], $eager: true});
 
-    // define routes
-    $route.when("",          {template:'partials/welcome.html',  controller:WelcomeCntl});
-    $route.when("/settings", {template:'partials/settings.html', controller:SettingsCntl});
+/**
+ * 
+ */
 
-}, {$inject:['$route'], $eager: true});
+angular.service("calculator", function(){
+    return {
+        add:function(a,b){
+            return a+b;
+        },
+        subtract:function(a,b){
+            return a-b;
+        },
+        multipy:function(a,b){
+            return a*b;
+        },
+        divide:function(a,b){
+            return a/b;
+        }
+    }
+})
 
 
 /**
@@ -30,8 +50,9 @@ angular.service("$commandMap", function($eventBus){
             }
             angular.forEach(commands[type],function(cmndDef){
                if(cmndDef.command === command ){
-                   if(cmndDef.once || onceOnly) throw "Conflict with previusly mapped event involving a 'once only' command.";
-                   // aleady mapped job done
+                   if(onceOnly) throw "You must unmap the existing event->commmand combo before adding it again as 'onceOnly'";
+                   if(cmndDef.once) throw "Conflict with an existing 'onceOnly' command";
+                   // aleady mapped, consider job done!
                    return;
                }
             });
