@@ -8,6 +8,14 @@ function CalculatorCtrl(){
 function DisplayCtrl(){
     // watch the parent expression and update the currently displayed
     // value & operation
+    var self = this;
+    self.digits = "0";
+    self.operator = "";
+    self.$parent.$watch( "expression", function(newV,oldV){
+        //var newV = self.$parent.expression;
+         self.digits = newV[newV.length - ((newV.length%2)?1:2)] || "0";
+         self.operator = newV[newV.length - ((newV.length%2)?2:1)] || "";
+    });
 }
 
 function KeyPadCtrl( $eventBus ){
@@ -25,19 +33,22 @@ function HistoryCtrl( $eventBus ){
     self.redos = [];
     self.undo = function(){
         // roll-back the expression
+        var log = self.undos = arr.pop();
+        if(log){
+            self.$parent.expression = log.expression;
+            bus.emit("undo", log.expression, log.input);
+            self.redo.unshift(log);
+        }
     }
     self.redo = function(){
-        // dispatch input again
-        lock = true;
-        //bus.dispatch("input", val, self.$parent.expression, self.$parent);
+        var log = self.redos.shift();
+        if(log){
+            self.$parent.expression = log.expression;
+            bus.emit("redo", log.expression, log.input);
+            self.undo.push(log); 
+        }
     }
     bus.on("input", function(input,curExpr,scope){
-        // Need a lock to prevent this from being done when 
-        // an undo/redo is being performed
-        if(lock){
-            lock = false;
-            return;
-        }
         // Log a new history item into undo and clear redos
         self.redos = [];
         self.undos.push({expression:curExpr,input:input});

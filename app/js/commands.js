@@ -30,7 +30,7 @@ function InputCommand( $eventBus, calculator ){
        
        if( input.match(/^\d$/)){
            // add a digit
-           // the last operation is '=', reset
+           // if the last operation is '=', reset
            if(newexp[digitInd-1] == "="){
                newexp = [self.addDigit(input)];
            } else {

@@ -88,7 +88,6 @@ describe( "Input Command", function(){
         expect(scope.expression).toEqualData(["2","+", "-2.0"]);
         input("+/-");
         expect(scope.expression).toEqualData(["2","+", "2.0"]);
-       
    });
    
    it("should add an operator, evaluating the expression", function(){
