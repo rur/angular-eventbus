@@ -1,6 +1,9 @@
-Angular Event Bus Service
-========================
+Angular Event Bus/Command Map Service 
+===================================
 
-This is a prototype exploring an event bus for Angular JS implemented as a stand alone service. A Scope Watcher service was also created as a interim solution until a tear-down event is added to the Angular Scope object.
+Prototype exploring an event bus and command map for Angular JS implemented as a stand alone service. A Scope Watcher service was also created as a hack to allow for a tear down to
+be performed on controllers.
 
 The Angular JS team are also working on a scope based event bus implementation, you can check out their progress here: https://github.com/angular/angular.js/pull/522
+
+NB: This is a PROTOTYPE! It is not tested on all browsers. There are known issues with IE. I don't recommend using it in your projects!
