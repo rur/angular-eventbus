@@ -4,15 +4,18 @@
         <title>Angular Calculate</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link href="css/app.css" rel="stylesheet"></link>
+        <link href='http://fonts.googleapis.com/css?family=Lekton' rel='stylesheet' type='text/css'></link>
     </head>
     <body ng:controller="AppCtrl">
         <div id="calculator" ng:controller="CalculatorCtrl">
             <div ng:controller="DisplayCtrl">
-                <p>{{digits}}</p>
-                <p>{{operator}}</p>
+                <div id="digital_desplay" >
+                    <p id="disp_digits">{{digits}}</p>
+                    <p id="disp_operator">{{operator | mathSymbol}}</p>
+                </div>
             </div>
             <div id="keypad" class="clearfix" ng:controller="KeyPadCtrl">
-                <div id="numpad">
+                <div id="numpad" class="buttongroup">
                     <button ng:click="input(7)">7</button>
                     <button ng:click="input(8)">8</button>
                     <button ng:click="input(9)">9</button>
@@ -26,7 +29,7 @@
                     <button ng:click="input('00')">00</button>
                     <button ng:click="input('.')">.</button>
                 </div>
-                <div id="operators">
+                <div id="operators" class="buttongroup">
                     <button ng:click="input('+/-')">&plusmn;</button>
                     <button ng:click="input('C')">C</button>
                     <button ng:click="input('-')">&minus;</button>
@@ -37,12 +40,18 @@
                 </div>
             </div>
             <div ng:controller="HistoryCtrl">
-                <ul>
-                    <li class="undo" ng:repeat="undo in undos">{{undo.input}}</li>
-                    <li class="redo" ng:repeat="redo in redos">{{redo.input}}</li>
-                </ul>
-                <button ng:click="undo()">Undo</button>
-                <button ng:click="redo()">Redo</button>
+                <div id="history_nav">
+                    <ul>
+                        <li class="undo" ng:repeat="undo in undos">{{undo.input | mathSymbol}}</li>
+                        <li class="redo" ng:repeat="redo in redos">{{redo.input | mathSymbol}}</li>
+                    </ul>
+                </div>
+                <button ng:click="undo()" ng:disabled="undos.$count() == 0">Undo</button>
+                <button ng:click="redo()" ng:disabled="redos.$count() == 0">Redo</button>
+            </div>
+            <div>
+                <p>debug</p>
+                <code>{{expression}}</code>
             </div>
         </div>
         

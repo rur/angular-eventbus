@@ -1,7 +1,7 @@
 /* app css stylesheet */
 
 #calculator {
-    width: 400px;
+    width: 300px;
 }
 
 #keypad {
@@ -10,16 +10,15 @@
 
 #keypad button{
     width   :   50px;
-    height   :   50px;
+    height  :   50px;
+    display :   inline;
+    float   :   left;
+    margin  :   0px
 }
 
 #numpad {
-    float   : left;
-    width   :   200px;
-}
-
-#numpad button {
-    display: inline;
+    float   :   left;
+    width   :   150px;
 }
 
 #operators {
@@ -27,8 +26,48 @@
     width: 120px;
 }
 
+#digital_desplay {
+    position: relative;
+    width       : 250px;
+    height      : 55px;
+    background-color: #73af81;
+    border  :   1px solid #4c6f53;
+    padding     : 1px;
+    vertical-align: middle;
+    position    : relative;
+    margin      :  30px auto 30px auto;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -o-border-radius: 2px;
+    -ms-border-radius: 2px;
+    -khtml-border-radius: 2px;
+    border-radius: 2px;
+    font-family : 'Lekton', sans-serif;
+    font-size   :   28px;
+    overflow: hidden;
+}
+
+#digital_desplay p {
+    margin      :   15px; 
+    display     :     block;
+    position    :   absolute;
+}
+
+#disp_digits {
+    right: 25px;
+    color       : #23522d;
+}
+
+#disp_operator {
+    color: #c8fbd2;
+    right: 0px;
+}
+
+.buttongroup{
+    margin-left: 15px;
+}
+
 .twocolbt {
-    float: left;
     height: 100px !important;
 }
 

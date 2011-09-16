@@ -37,6 +37,7 @@ function InputCommand( $eventBus, calculator, $log ){
        input = String(input);
        var newexp = expression.slice() || [], 
        digitInd = newexp.length - ( newexp.length % 2 ),
+       lastDigitInd = newexp.length - ((newexp.length%2)?1:2),
        operators = ["+", "-", "*", "/"],
        modifiers = ["+/-", "."]; 
        
@@ -48,9 +49,13 @@ function InputCommand( $eventBus, calculator, $log ){
            } else {
                newexp[digitInd] = self.addDigit(input, newexp[digitInd]);
            }
-       } else if(modifiers.indexOf(input) > -1){
-           // modify operand
-           newexp[digitInd] = self.modifyOperand(input, newexp[digitInd]);
+       } else if(modifiers.indexOf(input) > -1 ){
+           if(newexp[digitInd-1] == "="){
+               newexp = [self.modifyOperand(input)];
+           } else {
+               newexp[digitInd] = self.modifyOperand(input, newexp[digitInd]);
+           }
+           
        } else if( operators.indexOf(input)> -1 ){
            // add operator, evaluating first!
            newexp = self.evaluateExpression(newexp);
@@ -81,6 +86,7 @@ InputCommand.prototype = {
     },
     modifyOperand:function(input,operand){
         operand = operand || "";
+        operand = String(operand); // cast as string
         switch(input){
             case "+/-":
                 if(operand.charAt(0) == "-"){
