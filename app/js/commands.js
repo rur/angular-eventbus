@@ -18,14 +18,13 @@ StartUpCommand.$inject = ['$commandMap'];
  * <p/>
  * Actual arithmatic is delegated to the calculator service
  * <p/>
- * It has three operations it employs depending on the input:<br/>
- * - addDigit - adds a numeric digit to the expression <br/>
- * - modifyOperand - transforms the active operand<br/>
+ * It has three operations it employs depending on the input:   <br/>
+ * - addDigit - adds a numeric digit to the expression          <br/>
+ * - modifyOperand - transforms the active operand              <br/>
  * - evaluateExpression - evaluates the current expression array
- *      recursively until it is either complete or invalid<br/>
- * 
+ *      in the infix style, recursively as far as it can 
  */
-function InputCommand( $eventBus, calculator, $log ){
+function InputCommand( $eventBus, calculator ){
     var self = this;
     this.calculator = calculator;
     
@@ -39,18 +38,20 @@ function InputCommand( $eventBus, calculator, $log ){
        digitInd = newexp.length - ( newexp.length % 2 ),
        lastDigitInd = newexp.length - ((newexp.length%2)?1:2),
        operators = ["+", "-", "*", "/"],
-       modifiers = ["+/-", "."]; 
+       modifiers = ["+/-", "."],
+       equalsState = (newexp[digitInd-1] == "="); 
        
        if( input.match(/^\d|00$/)){
            // add a digit
            // if the last operator is '=', reset
-           if(newexp[digitInd-1] == "="){
+           if(equalsState){
                newexp = [self.addDigit(input)];
            } else {
                newexp[digitInd] = self.addDigit(input, newexp[digitInd]);
            }
        } else if(modifiers.indexOf(input) > -1 ){
-           if(newexp[digitInd-1] == "="){
+           // if the last operator is '=', reset
+           if(equalsState){
                newexp = [self.modifyOperand(input)];
            } else {
                newexp[digitInd] = self.modifyOperand(input, newexp[digitInd]);
@@ -62,14 +63,16 @@ function InputCommand( $eventBus, calculator, $log ){
            if(!newexp[0])newexp[0] = "0"; 
            newexp[1] = input;
        } else if( input == "=" ){
-           // just evaluate
-           newexp = [self.evaluateExpression(newexp)[0]];
-           newexp[1] = "=";
+           if(equalsState){
+               newexp.splice(newexp.indexOf("="));
+           }else {
+               newexp = [self.evaluateExpression(newexp)[0]];
+               newexp[1] = "=";
+           }
        } else if( input == "C" ){
            // clear expression
            newexp = [];
        }
-       $log.log({exp:newexp, scope:scope});
        scope.expression = newexp;
        scope.$eval();
     }

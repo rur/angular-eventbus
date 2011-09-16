@@ -63,6 +63,18 @@
     right: 0px;
 }
 
+#history_nav {
+    overflow: scroll;
+    width: 200px;
+    position: relative;
+    right: 0px;
+}
+
+#history_nav ul{
+    list-style: none;
+    float: right;
+}
+
 .buttongroup{
     margin-left: 15px;
 }
@@ -72,10 +84,44 @@
 }
 
 .undo {
-    color: #0099ff;
+    color: #fff;
+    background-color: #0099ff;
+    padding-top     : 4px;
+    padding-bottom     : 4px;
+    padding-left     : 8px;
+    padding-right     : 8px;
+    margin: 2px;
+    vertical-align: middle;
+    position    : relative;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -o-border-radius: 2px;
+    -ms-border-radius: 2px;
+    -khtml-border-radius: 2px;
+    border-radius: 2px;
+    font-size   :   11px;
+    display: inline;
+    font-family: Arial,Helvetica,sans-serif;
 }
 .redo {
-    color:#66cc00;
+    color: #fff;
+    background-color: #66cc00;
+    padding-top     : 4px;
+    padding-bottom     : 4px;
+    padding-left     : 8px;
+    padding-right     : 8px;
+    margin: 2px;
+    vertical-align: middle;
+    position    : relative;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -o-border-radius: 2px;
+    -ms-border-radius: 2px;
+    -khtml-border-radius: 2px;
+    border-radius: 2px;
+    font-size   :   11px;
+    display: inline;
+    font-family: Arial,Helvetica,sans-serif;
 }
 
 .clearfix:after {
