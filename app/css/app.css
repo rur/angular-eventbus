@@ -1,30 +1,61 @@
 /* app css stylesheet */
 
-.menu {
-  list-style: none;
-  border-bottom: 0.1em solid black;
-  margin-bottom: 2em;
-  padding: 0 0 0.5em;
+#calculator {
+    width: 400px;
 }
 
-.menu:before {
-  content: "[";
+#keypad {
+
 }
 
-.menu:after {
-  content: "]";
+#keypad button{
+    width   :   50px;
+    height   :   50px;
 }
 
-.menu > li {
-  display: inline;
+#numpad {
+    float   : left;
+    width   :   200px;
 }
 
-.menu > li:before {
-  content: "|";
-  padding-right: 0.3em;
+#numpad button {
+    display: inline;
 }
 
-.menu > li:nth-child(1):before {
-  content: "";
-  padding: 0;
+#operators {
+    float: left;
+    width: 120px;
+}
+
+.twocolbt {
+    float: left;
+    height: 100px !important;
+}
+
+.undo {
+    color: #0099ff;
+}
+.redo {
+    color:#66cc00;
+}
+
+.clearfix:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+
+.clearfix {
+    display: inline-block;
+}
+
+html[xmlns] .clearfix {
+    display: block;
+}
+
+* html .clearfix {
+    height: 1%;
 }

@@ -25,7 +25,7 @@ angular.service("calculator", function(){
         subtract:function(a,b){
             return a-b;
         },
-        multipy:function(a,b){
+        multiply:function(a,b){
             return a*b;
         },
         divide:function(a,b){

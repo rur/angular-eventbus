@@ -6,9 +6,7 @@
 function StartUpCommand( $commandMap ){
     // this could take a config object if needed
     this.execute = function(){
-        // map commands here
-        // input
-        // evaluate
+        $commandMap.mapEvent("input", InputCommand);
     }
 }
 StartUpCommand.$inject = ['$commandMap'];
@@ -27,7 +25,7 @@ StartUpCommand.$inject = ['$commandMap'];
  *      recursively until it is either complete or invalid<br/>
  * 
  */
-function InputCommand( $eventBus, calculator ){
+function InputCommand( $eventBus, calculator, $log ){
     var self = this;
     this.calculator = calculator;
     
@@ -37,12 +35,12 @@ function InputCommand( $eventBus, calculator ){
      */
     this.execute = function( input, expression, scope ){
        input = String(input);
-       var newexp = expression || [], 
+       var newexp = expression.slice() || [], 
        digitInd = newexp.length - ( newexp.length % 2 ),
        operators = ["+", "-", "*", "/"],
        modifiers = ["+/-", "."]; 
        
-       if( input.match(/^\d$/)){
+       if( input.match(/^\d|00$/)){
            // add a digit
            // if the last operator is '=', reset
            if(newexp[digitInd-1] == "="){
@@ -66,7 +64,7 @@ function InputCommand( $eventBus, calculator ){
            // clear expression
            newexp = [];
        }
-   
+       $log.log({exp:newexp, scope:scope});
        scope.expression = newexp;
        scope.$eval();
     }
@@ -74,7 +72,7 @@ function InputCommand( $eventBus, calculator ){
 InputCommand.prototype = {
     addDigit:function( digit, operand ){
         digit = String(digit);
-        if(!digit.match(/^[\d\.]$/)) return operand;
+        if(!digit.match(/^00|[\d\.]$/)) return operand;
         operand = operand || "";
         operand = operand + digit;
         // get rid of unnecessary 0's at the start
@@ -131,4 +129,4 @@ InputCommand.prototype = {
     }
 }
 
-InputCommand.$inject = ["$eventBus", "calculator"];
+InputCommand.$inject = ["$eventBus", "calculator", "$log"];
