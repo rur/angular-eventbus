@@ -21,7 +21,7 @@ function DisplayCtrl(){
 function KeyPadCtrl( $eventBus ){
     var self = this, bus = $eventBus(this);
     self.input = function(val){
-        bus.dispatch("input", val, self.$parent.expression, self.$parent);
+        bus.emit("input", val, self.$parent.expression, self.$parent);
     }
 }
 
@@ -33,22 +33,28 @@ function HistoryCtrl( $eventBus ){
     self.redos = [];
     self.undo = function(){
         // roll-back the expression
-        var log = self.undos = arr.pop();
+        var log = self.undos.pop();
         if(log){
             self.$parent.expression = log.expression;
-            bus.emit("undo", log.expression, log.input);
-            self.redo.unshift(log);
+            self.redos.unshift(log);
         }
     }
     self.redo = function(){
         var log = self.redos.shift();
         if(log){
             self.$parent.expression = log.expression;
-            bus.emit("redo", log.expression, log.input);
-            self.undo.push(log); 
+            lock = true;
+            bus.emit("input", log.input, self.$parent.expression, self.$parent);
+            self.undos.push(log); 
         }
     }
     bus.on("input", function(input,curExpr,scope){
+        if(lock){
+            lock = false;
+            // a history action is taking place so don't log it
+            return
+        }
+        
         // Log a new history item into undo and clear redos
         self.redos = [];
         self.undos.push({expression:curExpr,input:input});

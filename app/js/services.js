@@ -11,7 +11,10 @@ angular.service('angularBoot', function($commandMap) {
 }, {$inject:['$commandMap'], $eager: true});
 
 /**
- * 
+ * Calculator service, used by InputCommand
+ * <p/>
+ * this could really be a global math util object but 
+ * I wanted to demonstrate injection into commands
  */
 
 angular.service("calculator", function(){

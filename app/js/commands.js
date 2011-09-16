@@ -13,6 +13,20 @@ function StartUpCommand( $commandMap ){
 }
 StartUpCommand.$inject = ['$commandMap'];
 
+/**
+ * Input Command is responsible for 
+ * applying a calculator input to the 
+ * current calculator expression
+ * <p/>
+ * Actual arithmatic is delegated to the calculator service
+ * <p/>
+ * It has three operations it employs depending on the input:<br/>
+ * - addDigit - adds a numeric digit to the expression <br/>
+ * - modifyOperand - transforms the active operand<br/>
+ * - evaluateExpression - evaluates the current expression array
+ *      recursively until it is either complete or invalid<br/>
+ * 
+ */
 function InputCommand( $eventBus, calculator ){
     var self = this;
     this.calculator = calculator;
@@ -30,7 +44,7 @@ function InputCommand( $eventBus, calculator ){
        
        if( input.match(/^\d$/)){
            // add a digit
-           // if the last operation is '=', reset
+           // if the last operator is '=', reset
            if(newexp[digitInd-1] == "="){
                newexp = [self.addDigit(input)];
            } else {
@@ -54,6 +68,7 @@ function InputCommand( $eventBus, calculator ){
        }
    
        scope.expression = newexp;
+       scope.$eval();
     }
 }
 InputCommand.prototype = {
@@ -62,8 +77,8 @@ InputCommand.prototype = {
         if(!digit.match(/^[\d\.]$/)) return operand;
         operand = operand || "";
         operand = operand + digit;
-        // get rid of unnecessaray 0 at the start
-        operand = operand.replace( /(^-?)0+(0\.|[1-9]|0)/, "$1$2" );
+        // get rid of unnecessary 0's at the start
+        operand = operand.replace( /^(-?)0+(0\.|[1-9]|0)/, "$1$2" );
         return operand;
     },
     modifyOperand:function(input,operand){
@@ -82,17 +97,18 @@ InputCommand.prototype = {
                     return operand.replace(/(^|[^\d])\./,"$10.");
                 }
                 break;
+            // add PIE, LOG, SINE, SQRT etc.. here
         }
         return operand;
     },
     evaluateExpression:function(expr){
         var res = expr ? expr.slice() : [], 
 	operand1 = res[0] * 1, 
-	operation = res[1],
+	operator = res[1],
 	operand2 = res[2] * 1,
 	ans;
-	if( operand1 && operation && operand2){
-            switch(operation){
+	if( operand1 && operator && operand2){
+            switch(operator){
                 case "+":
                     ans = [this.calculator.add(operand1,operand2)];
                     break;

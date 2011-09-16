@@ -70,5 +70,97 @@ describe("Display Control", function(){
         calcSc.$eval();
         expect(displaySc.operator).toEqual("");
     });
+});
+
+describe("KeyPadCtrl", function(){
+   var calcSc, keysSc, bus, inputSpy; 
     
+    beforeEach(function(){
+        this.addMatchers({
+            toEqualData: function(expected) {
+                return angular.equals(this.actual, expected);
+            }
+        });
+        calcSc = angular.scope();
+        calcSc.expression = [];
+        bus = calcSc.$service("$eventBus");
+        keysSc = calcSc.$new(KeyPadCtrl);
+        inputSpy = jasmine.createSpy("input spy");
+        bus.on("input", inputSpy);
+    }); 
+    
+    it("should emit input with all required params when input method is called", function(){
+        calcSc.expression = ["1"];
+        keysSc.input("3");
+        expect(inputSpy).toHaveBeenCalledWith("3",["1"],calcSc);
+    })
+});
+
+describe("HistoryCtrl", function(){
+   var calcSc, histSc, bus, inputSpy; 
+    
+    beforeEach(function(){
+        this.addMatchers({
+            toEqualData: function(expected) {
+                return angular.equals(this.actual, expected);
+            }
+       });
+        calcSc = angular.scope();
+        calcSc.expression = [];
+        bus = calcSc.$service("$eventBus");
+        histSc = calcSc.$new(HistoryCtrl);
+        inputSpy = jasmine.createSpy("input spy");
+        bus.on("input", inputSpy);
+    });
+    
+    it("should log history items when input event is dispatched", function(){
+        bus.emit("input","1", [], calcSc);
+        expect(histSc.undos).toEqualData([{expression:[],input:"1"}]);
+        expect(histSc.redos).toEqualData([]);
+        bus.emit("input","4", ["1"], calcSc);
+        expect(histSc.undos[1]).toEqualData({expression:["1"],input:"4"});
+        expect(histSc.redos).toEqualData([]);
+    });
+    
+    it("should undo and redo applying expression to the parent scope", function(){
+        bus.emit("input","1", [], calcSc);
+        bus.emit("input","4", ["1"], calcSc);
+        bus.emit("input","+", ["14"], calcSc);
+        bus.emit("input","1", ["14","+"], calcSc);
+        histSc.undo();
+        expect(calcSc.expression).toEqualData(["14","+"]);
+        expect(histSc.redos[0]).toEqualData({expression:["14","+"], input:"1"});
+        expect(histSc.undos.length).toEqual(3);
+        histSc.undo();
+        expect(calcSc.expression).toEqualData(["14"]);
+        expect(histSc.redos).toEqualData([{expression:["14"], input:"+"},{expression:["14","+"], input:"1"}]);
+        expect(histSc.undos).toEqualData([{expression:[], input:"1"},{expression:["1"], input:"4"}]);
+        histSc.redo();
+        expect(calcSc.expression).toEqualData(["14"]);
+        expect(inputSpy).toHaveBeenCalledWith("+",["14"],calcSc);
+        expect(histSc.redos).toEqualData([{expression:["14","+"], input:"1"}]);
+        expect(histSc.undos).toEqualData([
+            {expression:[], input:"1"},
+            {expression:["1"], input:"4"},
+            {expression:["14"], input:"+"}
+        ]);
+        histSc.redo();
+        expect(calcSc.expression).toEqualData(["14","+"]);
+        expect(inputSpy).toHaveBeenCalledWith("1",["14","+"],calcSc);
+        expect(histSc.redos).toEqualData([]);
+        expect(histSc.undos).toEqualData([
+            {expression:[], input:"1"},
+            {expression:["1"], input:"4"},
+            {expression:["14"], input:"+"},
+            {expression:["14","+"], input:"1"}
+        ]);
+    })
+    
+    it("should clear redos when a new input takes place", function(){
+        bus.emit("input","1", [], calcSc);
+        bus.emit("input","4", ["1"], calcSc);
+        histSc.undo();
+        bus.emit("input","5", ["1"], calcSc);
+        expect(histSc.redos).toEqual([]);
+    });
 });
