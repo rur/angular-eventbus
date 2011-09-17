@@ -73,6 +73,13 @@ function HistoryCtrl( $eventBus ){
         self.redos = [];
         self.undos.push({expression:curExpr,input:input});
     } )
+    
+    
 }
-
 HistoryCtrl.$inject = ["$eventBus"];
+
+var controlUtils = {
+    reverse:function(arr){
+        
+    }
+}

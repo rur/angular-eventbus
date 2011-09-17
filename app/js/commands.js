@@ -24,9 +24,10 @@ StartUpCommand.$inject = ['$commandMap'];
  * - evaluateExpression - evaluates the current expression array
  *      in the infix style, recursively as far as it can 
  */
-function InputCommand( $eventBus, calculator ){
+function InputCommand( $eventBus, calculator, $log ){
     var self = this;
     this.calculator = calculator;
+    this.log = $log;
     
     /**
      *  execute get called by the commmand map with the
@@ -95,7 +96,7 @@ InputCommand.prototype = {
                 if(operand.charAt(0) == "-"){
                  return operand.substr(1);
                 } else {
-                    return "-"+operand;
+                    return "-"+ ((operand.length > 0) ? operand : "0");
                 }
                 break;
             case ".":
@@ -114,7 +115,9 @@ InputCommand.prototype = {
 	operator = res[1],
 	operand2 = res[2] * 1,
 	ans;
-	if( operand1 && operator && operand2){
+        
+        this.log.log([operand1, operator, operand2])
+	if( !isNaN( operand1 ) && operator && !isNaN( operand2 )){
             switch(operator){
                 case "+":
                     ans = [this.calculator.add(operand1,operand2)];

@@ -15,8 +15,8 @@
                 <button ng:click="redo()" ng:disabled="redos.$count() == 0">REDO</button>
                 <div id="history_nav">
                     <ul>
-                        <li class="redo" ng:repeat="redo in redos">{{redo.input | mathSymbol}}</li>
-                        <li class="undo" ng:repeat="undo in undos">{{undo.input | mathSymbol}}</li>
+                        <li class="hisotry-item redo" ng:repeat="redo in redos.concat().reverse()">{{redo.input | mathSymbol}}</li>
+                        <li class="hisotry-item undo" ng:repeat="undo in undos.concat().reverse()">{{undo.input | mathSymbol}}</li>
                     </ul>
                 </div>
             </div>
@@ -53,6 +53,7 @@
                     <button ng:click="input('=')">=</button>
                 </div>
             </div>
+            
             <div>
                 <p>debug</p>
                 <code>{{expression}}</code>
