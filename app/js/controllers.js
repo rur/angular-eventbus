@@ -76,7 +76,17 @@ function HistoryCtrl( $eventBus ){
         self.redos = [];
         self.undos.push({expression:curExpr,input:input});
     } )
-    
-    
+    self.goToStep = function(entry){
+        var ind = self.undos.indexOf(entry);
+        if( ind > -1 ){
+            self.undo(ind+1);
+            return;
+        }
+        var ind = self.redos.indexOf(entry);
+        if( ind > -1 ){
+            self.redo(ind);
+            return;
+        }
+    }
 }
 HistoryCtrl.$inject = ["$eventBus"];

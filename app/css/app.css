@@ -145,7 +145,7 @@ body {
     border-radius: 2px;
     font-size   :   11px;
     font-family: Arial,Helvetica,sans-serif;
-    
+    cursor: pointer;
 }
 
 .undo {
