@@ -116,7 +116,6 @@ InputCommand.prototype = {
 	operand2 = res[2] * 1,
 	ans;
         
-        this.log.log([operand1, operator, operand2])
 	if( !isNaN( operand1 ) && operator && !isNaN( operand2 )){
             switch(operator){
                 case "+":

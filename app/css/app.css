@@ -10,6 +10,12 @@ body {
     background-color: #fff;
     padding-bottom: 30px;
     margin-top: 20px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    -o-border-radius: 2px;
+    -ms-border-radius: 2px;
+    -khtml-border-radius: 2px;
+    border-radius: 2px;
 }
 
 #keypad {

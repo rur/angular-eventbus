@@ -45,21 +45,24 @@ function HistoryCtrl( $eventBus ){
     var bus = $eventBus(this), lock = false, self = this;
     self.undos = [];
     self.redos = [];
-    self.undo = function(){
-        // roll-back the expression
-        var log = self.undos.pop();
+    self.undo = function(ind){
+        ind = ( typeof ind == "number" && ind > -1) ? ind : self.undos.length -1;
+        var entries = self.undos.splice(ind);
+        var log = entries[0];
         if(log){
             bus.emit("updateCalculator", log.expression);
-            self.redos.unshift(log);
+            self.redos = entries.concat(self.redos);
         }
     }
-    self.redo = function(){
-        var log = self.redos.shift();
+    self.redo = function(ind){ 
+        ind = ( typeof ind == "number" && ind > -1) ? ind : 0;
+        var entries = self.redos.splice(0, ind + 1);
+        var log = entries[entries.length-1];
         if(log){
             bus.emit("updateCalculator", log.expression);
             lock = true;
-            bus.emit("input", log.input, self.$parent.expression);
-            self.undos.push(log); 
+            bus.emit("input", log.input, log.expression);
+            self.undos = self.undos.concat(entries); 
         }
     }
     bus.on("input", function(input,curExpr,scope){
@@ -77,9 +80,3 @@ function HistoryCtrl( $eventBus ){
     
 }
 HistoryCtrl.$inject = ["$eventBus"];
-
-var controlUtils = {
-    reverse:function(arr){
-        
-    }
-}

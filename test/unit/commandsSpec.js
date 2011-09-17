@@ -126,6 +126,19 @@ describe( "Input Command", function(){
         expect(scope.expression).toEqualData(["-2","="]);
         input("4");
         expect(scope.expression).toEqualData(["4"]);
+        input("=");
+        expect(scope.expression).toEqualData(["4","="]);
+        input("=");
+        expect(scope.expression).toEqualData(["4"]);
+        input("C");
+        expect(scope.expression).toEqualData([]);
+        input("+");
+        expect(scope.expression).toEqualData(["0", "+"]);
+        input("4");
+        expect(scope.expression).toEqualData(["0", "+", "4"]);
+        input("=");
+        expect(scope.expression).toEqualData(["4", "="]);
+        
    });
 });
    

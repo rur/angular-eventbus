@@ -169,4 +169,32 @@ describe("HistoryCtrl", function(){
         bus.emit("input","5", ["1"], calcSc);
         expect(histSc.redos).toEqual([]);
     });
+    
+    it("should undo and redo when provided with indexes", function(){
+        bus.emit("input","1", [], calcSc);
+        bus.emit("input","4", ["1"], calcSc);
+        bus.emit("input","+", ["14"], calcSc);
+        bus.emit("input","1", ["14","+"], calcSc);
+        
+        histSc.undo(1);
+        expect(calcSc.expression).toEqualData(["1"]);
+        expect(histSc.undos).toEqualData([
+            {expression:[], input:"1"}]
+        );
+        expect(histSc.redos).toEqualData([
+            {expression:["1"], input:"4"},
+            {expression:["14"], input:"+"},
+            {expression:["14","+"], input:"1"}
+        ]);
+         histSc.redo(2);
+        expect(calcSc.expression).toEqualData(["14","+"]);
+        expect(inputSpy).toHaveBeenCalledWith("1",["14","+"]);
+        expect(histSc.redos).toEqualData([]);
+        expect(histSc.undos).toEqualData([
+            {expression:[], input:"1"},
+            {expression:["1"], input:"4"},
+            {expression:["14"], input:"+"},
+            {expression:["14","+"], input:"1"}
+        ]);
+    })
 });
