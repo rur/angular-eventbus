@@ -11,8 +11,8 @@
         
         <div id="left_panel" class="col">
             <div ng:controller="HistoryCtrl">
-                <button ng:click="undo()" ng:disabled="undos.$count() == 0">UNDO</button>
-                <button ng:click="redo()" ng:disabled="redos.$count() == 0">REDO</button>
+                <button ng:click="undo()" ng:disabled="{{undos.$count() == 0}}">UNDO</button>
+                <button ng:click="redo()" ng:disabled="{{redos.$count() == 0}}">REDO</button>
                 <div id="history_nav">
                     <ul>
                         <li class="hisotry-item redo" ng:click="goToStep(redo)" ng:repeat="redo in redos.concat().reverse()">{{redo.input | mathSymbol}}</li>
