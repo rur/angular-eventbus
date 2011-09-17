@@ -92,7 +92,7 @@ describe("KeyPadCtrl", function(){
     it("should emit input with all required params when input method is called", function(){
         calcSc.expression = ["1"];
         keysSc.input("3");
-        expect(inputSpy).toHaveBeenCalledWith("3",["1"],calcSc);
+        expect(inputSpy).toHaveBeenCalledWith("3",["1"]);
     })
 });
 
@@ -104,13 +104,19 @@ describe("HistoryCtrl", function(){
             toEqualData: function(expected) {
                 return angular.equals(this.actual, expected);
             }
-       });
+        });
+        
         calcSc = angular.scope();
         calcSc.expression = [];
         bus = calcSc.$service("$eventBus");
         histSc = calcSc.$new(HistoryCtrl);
         inputSpy = jasmine.createSpy("input spy");
+        
         bus.on("input", inputSpy);
+        bus.on("updateCalculator", function(exp){
+           calcSc.expression = exp;
+           calcSc.$eval();
+        })
     });
     
     it("should log history items when input event is dispatched", function(){

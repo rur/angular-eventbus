@@ -5,10 +5,19 @@ function AppCtrl( $eventBus ){
 }
 AppCtrl.$inject = ["$eventBus"];
 
-function CalculatorCtrl(){
-    this.expression = [];
+function CalculatorCtrl( $eventBus ){
+    var self = this;
+    self.expression = [];
+    
+    // ideally this would be a command with this 
+    // scope injected in!
+    var bus = $eventBus(this);
+    bus.on("updateCalculator", function(expr){
+        self.expression = expr;
+        self.$eval();
+    })
 }
-
+CalculatorCtrl.$inject = ["$eventBus"];
 
 function DisplayCtrl( $log ){
     // watch the parent expression and update the currently displayed
@@ -26,7 +35,7 @@ function DisplayCtrl( $log ){
 function KeyPadCtrl( $eventBus ){
     var self = this, bus = $eventBus(this);
     self.input = function(val){
-        bus.emit("input", val, self.$parent.expression.concat(), self.$parent);
+        bus.emit("input", val, self.$parent.expression.concat());
     }
 }
 
@@ -40,18 +49,16 @@ function HistoryCtrl( $eventBus ){
         // roll-back the expression
         var log = self.undos.pop();
         if(log){
-            self.$parent.expression = log.expression;
-            self.$parent.$eval();
+            bus.emit("updateCalculator", log.expression);
             self.redos.unshift(log);
         }
     }
     self.redo = function(){
         var log = self.redos.shift();
         if(log){
-            self.$parent.expression = log.expression;
-            self.$parent.$eval();
+            bus.emit("updateCalculator", log.expression);
             lock = true;
-            bus.emit("input", log.input, self.$parent.expression, self.$parent);
+            bus.emit("input", log.input, self.$parent.expression);
             self.undos.push(log); 
         }
     }

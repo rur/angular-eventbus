@@ -1,5 +1,7 @@
 /* app css stylesheet */
 
+
+
 #calculator {
     width: 300px;
 }
@@ -64,15 +66,26 @@
 }
 
 #history_nav {
-    overflow: scroll;
-    width: 200px;
-    position: relative;
-    right: 0px;
+    width: 30px;
 }
 
 #history_nav ul{
     list-style: none;
-    float: right;
+    width: 50px;
+}
+#history_nav li{
+    margin-left     : auto;
+    margin-right     : auto;
+}
+
+#left_panel button{
+    width: 50px;
+    height: 50px;
+    display: block;
+}
+
+.col{
+    float: left;
 }
 
 .buttongroup{
@@ -100,7 +113,6 @@
     -khtml-border-radius: 2px;
     border-radius: 2px;
     font-size   :   11px;
-    display: inline;
     font-family: Arial,Helvetica,sans-serif;
 }
 .redo {
@@ -120,7 +132,6 @@
     -khtml-border-radius: 2px;
     border-radius: 2px;
     font-size   :   11px;
-    display: inline;
     font-family: Arial,Helvetica,sans-serif;
 }
 

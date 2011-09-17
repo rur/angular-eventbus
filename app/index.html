@@ -5,9 +5,23 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link href="css/app.css" rel="stylesheet"></link>
         <link href='http://fonts.googleapis.com/css?family=Lekton' rel='stylesheet' type='text/css'></link>
+        <link href="css/reset.css" rel="stylesheet"/>
     </head>
     <body ng:controller="AppCtrl">
-        <div id="calculator" ng:controller="CalculatorCtrl">
+        
+        <div id="left_panel" class="col">
+            <div ng:controller="HistoryCtrl">
+                <button ng:click="undo()" ng:disabled="undos.$count() == 0">UNDO</button>
+                <button ng:click="redo()" ng:disabled="redos.$count() == 0">REDO</button>
+                <div id="history_nav">
+                    <ul>
+                        <li class="redo" ng:repeat="redo in redos">{{redo.input | mathSymbol}}</li>
+                        <li class="undo" ng:repeat="undo in undos">{{undo.input | mathSymbol}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="calculator" ng:controller="CalculatorCtrl" class="col">
             <div ng:controller="DisplayCtrl">
                 <div id="digital_desplay" >
                     <p id="disp_digits">{{digits}}</p>
@@ -38,16 +52,6 @@
                     <button ng:click="input('/')">&divide;</button>
                     <button ng:click="input('=')">=</button>
                 </div>
-            </div>
-            <div ng:controller="HistoryCtrl">
-                <div id="history_nav">
-                    <ul>
-                        <li class="undo" ng:repeat="undo in undos">{{undo.input | mathSymbol}}</li>
-                        <li class="redo" ng:repeat="redo in redos">{{redo.input | mathSymbol}}</li>
-                    </ul>
-                </div>
-                <button ng:click="undo()" ng:disabled="undos.$count() == 0">Undo</button>
-                <button ng:click="redo()" ng:disabled="redos.$count() == 0">Redo</button>
             </div>
             <div>
                 <p>debug</p>

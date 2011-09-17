@@ -16,8 +16,12 @@ describe( "Input Command", function(){
        map = scope.$service("$commandMap");
        map.mapEvent("input", InputCommand);
        input = function(inp){
-           bus.emit( "input", inp, scope.expression, scope );
+           bus.emit( "input", inp, scope.expression );
        }
+       bus.on("updateCalculator", function(exp){
+           scope.expression = exp;
+           scope.$eval();
+       })
    });
    
    it("should update the operand in a blank expression", function()

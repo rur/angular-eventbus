@@ -32,9 +32,9 @@ function InputCommand( $eventBus, calculator ){
      *  execute get called by the commmand map with the
      *  params of the 'emit' event bus call
      */
-    this.execute = function( input, expression, scope ){
+    this.execute = function( input, expression){
        input = String(input);
-       var newexp = expression.slice() || [], 
+       var newexp = (expression) ? expression.slice() : [], 
        digitInd = newexp.length - ( newexp.length % 2 ),
        lastDigitInd = newexp.length - ((newexp.length%2)?1:2),
        operators = ["+", "-", "*", "/"],
@@ -73,8 +73,8 @@ function InputCommand( $eventBus, calculator ){
            // clear expression
            newexp = [];
        }
-       scope.expression = newexp;
-       scope.$eval();
+       
+       $eventBus.emit("updateCalculator", newexp);
     }
 }
 InputCommand.prototype = {
