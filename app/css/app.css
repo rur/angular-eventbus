@@ -168,6 +168,10 @@ body {
     display: inline-block;
 }
 
+.angular-unhide {
+    visibility: hidden;
+}
+
 html[xmlns] .clearfix {
     display: block;
 }
